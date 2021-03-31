@@ -35,25 +35,11 @@ bool move(Map* map, Player* player, char direction) {
 	Chunk* head = removeChunk(map, player->head->x, player->head->y);
 	unsigned int newX = head->x, newY = head->y;
 	//#region body flow
-	if (player->bodySize > 0) {
-		Chunk *curr, *next;
-		for (unsigned int i = player->bodySize - 1; i > 0; i--) {
-			curr = player->body[i];
-			next = player->body[i-1];
-			removeChunk(map, curr->x, curr->y);
-			curr->x = next->x;
-			curr->y = next->y;
-
-		}
-
-		curr = player->body[0];
-		removeChunk(map, curr->x, curr->y);
-		curr->x = head->x;
-		curr->y = head->y;
-		for (unsigned int i = 0; i < player->bodySize; i++) {
-			replaceChunk(map, player->body[i]);
-		}
-	}
+	/*
+		Utilizando o conteúdo disponibilizado 
+		desenvolva um código que faça o corpo 
+		do jogador seguir sua cabeça
+	*/
 	//#endregion
 	//#region move
 	switch (direction) {
