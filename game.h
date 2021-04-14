@@ -77,5 +77,6 @@ bool move(Map* map, Player* player, char direction) {
 		}
 	}
 	//#endregion
+	free(element);
 	return result;
 }
