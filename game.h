@@ -14,26 +14,27 @@
 #define LEFT	'a'
 
 Player* createPlayer(Map* map) {
-	Player* player = (Player*) malloc(sizeof(Player));
+	Player* player = (Player*) malloc(sizeof(Player)); //Instancia um novo jogador no mapa informado
 	player->direction = UP;
 	player->bodySize = 0;
-	player->head = placeChunk(map, HEAD, map->width/2, map->height/2);
-	player->body = (Chunk**) calloc((map->width-1) * (map->height-1), sizeof(Chunk*));
+	player->head = createChunk(HEAD, map->width/2, map->height/2);
+	setChunk(map, player->head); //Posiciona a cabeca do jogador no mapa
+	player->body = (Chunk**) calloc((map->width-1) * (map->height-1), sizeof(Chunk*)); //Instancia o vetor do corpo
 }
 
 void placeBerry(Map* map) {
 	unsigned int x = rand() % map->width, y = rand() % map->height;
-	while (getChunk(map, x, y) != NULL) {
+	while (getChunk(map, x, y) != NULL) { //Por enquanto a nova posicao da fruta estiver ocupada se continua procurando uma nova posicao
 		x = rand() % map->width;
 		y = rand() % map->height;
 	}
-	placeChunk(map, BERRY, x, y);
+	setChunk(map, createChunk(BERRY, x, y)); //Posiciona a fruta
 }
 
 bool move(Map* map, Player* player, char direction) {
-	player->direction = direction;		
-	Chunk* head = removeChunk(map, player->head->x, player->head->y);
-	unsigned int newX = head->x, newY = head->y;
+	player->direction = direction; //Definit a nova direcao do jogador
+	Chunk* head = removeChunk(map, player->head->x, player->head->y); //Se remove a cabeca para permitir a movimentacao do corpo
+	unsigned int newX = head->x, newY = head->y; //Se armazena a posicao que a proxima parte do corpo sera inserida
 	//#region body flow
 	/*
 		Utilizando o conteúdo disponibilizado 
@@ -42,7 +43,7 @@ bool move(Map* map, Player* player, char direction) {
 	*/
 	//#endregion
 	//#region move
-	switch (direction) {
+	switch (direction) { //Mover cabeca na direcao informada
 		case UP:
 			head->y--;
 			break;
@@ -58,21 +59,23 @@ bool move(Map* map, Player* player, char direction) {
 	}
 	//#endregion
 	//#region collision
-	bool result = true;
-	Chunk* element = replaceChunk(map, head);
-	if (element != NULL) {
+	bool result = true; //Situacao do jogo ("true" para continua e "false" para fim de jogo)
+	Chunk* element = replaceChunk(map, head); //Posicionar a cabeca e obter elemento colidido
+	Chunk* newBodyPart;
+	if (element != NULL) { //Caso seja:
 		switch (element->icon) {
-			case BODY:
+			case BODY: //Corpo = fim de jogo
 				result = false;
 				break;
-			case WALL:
+			case WALL: //Parede = fim de jogo
 				result = false;
 				break;
-			case BERRY:
-				//Increase size
-				player->body[player->bodySize] = placeChunk(map, BODY, newX, newY);
-				player->bodySize++;
-				placeBerry(map);
+			case BERRY: //Fruta
+				newBodyPart = createChunk(BODY, newX, newY); //Criar e posicionar uma nova parte do corpo
+				player->body[player->bodySize] = newBodyPart;
+				setChunk(map, newBodyPart);
+				player->bodySize++; //Acumular pontos
+				placeBerry(map); //Posicionar uma nova fruta
 				break;
 		}
 	}
